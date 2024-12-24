@@ -19,7 +19,7 @@ app.use((req, res, next) => {
 });
 
 app.get("/places", async (req, res) => {
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  await new Promise((resolve) => setTimeout(resolve, 4000));
 
   const fileContent = await fs.readFile("./data/places.json");
 
@@ -91,4 +91,4 @@ app.use((req, res, next) => {
   res.status(404).json({ message: "404 - Not Found" });
 });
 
-app.listen(3000);
+app.listen(4000);

@@ -1,9 +1,10 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 
 import { Place } from '../place.model';
 import { PlacesComponent } from '../places.component';
 import { PlacesContainerComponent } from '../places-container/places-container.component';
 import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-available-places',
@@ -18,7 +19,18 @@ export class AvailablePlacesComponent implements OnInit {
   // alternative
   // constructor(private httpClient:HttpClient){}
 
-  ngOnInit():void{
+  private destroyRef = inject(DestroyRef)
+
+  ngOnInit(): void {
+    const subscription = this.httpClient.get<{places:Place[]}>('http://localhost:4000/places'
+    ).pipe(map((resDataObj)=>resDataObj.places)).subscribe({
+      next: (resArray) => {
+        this.places.set(resArray)
+        console.log(resArray);
+        
+      }
+    });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe())
 
   }
 
