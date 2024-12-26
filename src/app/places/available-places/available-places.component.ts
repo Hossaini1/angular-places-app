@@ -4,7 +4,7 @@ import { Place } from '../place.model';
 import { PlacesComponent } from '../places.component';
 import { PlacesContainerComponent } from '../places-container/places-container.component';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs';
+import { catchError, map, throwError } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -16,6 +16,7 @@ import { CommonModule } from '@angular/common';
 })
 export class AvailablePlacesComponent implements OnInit {
   isFetching = signal(false);
+  errorMessage = signal('');
   places = signal<Place[] | undefined>(undefined);
   private httpClient = inject(HttpClient);
   // alternative
@@ -25,9 +26,12 @@ export class AvailablePlacesComponent implements OnInit {
 
   ngOnInit(): void {
     this.isFetching.set(true);
-
     const subscription = this.httpClient.get<{places:Place[]}>('http://localhost:3000/places'
-    ).pipe(map((resDataObj)=>resDataObj.places)).subscribe({
+    ).pipe(map((resDataObj)=>resDataObj.places),catchError((error)=>{
+      console.error(error);
+      return throwError(()=>new Error('Something is wrog! Please try again!!!'))
+      
+    })).subscribe({
       next: (resArray) => {
         this.places.set(resArray)
         console.log(resArray);
@@ -35,12 +39,14 @@ export class AvailablePlacesComponent implements OnInit {
       },
       complete:()=>{
         this.isFetching.set(false)
+      },
+      error:(err:Error)=>{
+        console.error(err)
+        return this.errorMessage.set(err.message)
       }
 
     });
     this.destroyRef.onDestroy(() => subscription.unsubscribe())
 
   }
-
-
 }

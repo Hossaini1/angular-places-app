@@ -1,5 +1,9 @@
 <app-places-container title="Available Places">
-  <p *ngIf="isFetching()" class="fallback-text">Fetching available places...</p>
+  <p *ngIf="isFetching() && !errorMessage()" class="fallback-text">Fetching available places...</p>
+
+  @if (errorMessage()) {
+  <p class="fallback-text">{{errorMessage()}}</p>
+  }
   @if (places()) {
   <app-places [places]="places()!" />
   } @else if (places()?.length === 0) {
