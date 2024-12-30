@@ -1,10 +1,12 @@
 <app-places-container title="Your Favorite Places">
   @if (isLoading() && !errorMsg()) {
   <p class="fallback-text">Fetching favorite places....</p>
-  }@else if (errorMsg()) {
+  }
+  @if (errorMsg()) {
   <p class="fallback-text">{{errorMsg()}}</p>
-  }@else if(favoritePlaces()){
-  <app-places [places]="favoritePlaces()!" />
+  }
+   @if(places()){
+  <app-places [places]="places()!" />
   }@else {
     <p class="fallback-text">Sorry! There is no places!</p>
   }

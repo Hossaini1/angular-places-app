@@ -6,56 +6,51 @@ import { PlacesContainerComponent } from '../places-container/places-container.c
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, throwError } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { PlacesService } from '../places.service';
 
 @Component({
   selector: 'app-available-places',
   standalone: true,
   templateUrl: './available-places.component.html',
   styleUrl: './available-places.component.css',
-  imports: [PlacesComponent, PlacesContainerComponent,CommonModule],
+  imports: [PlacesComponent, PlacesContainerComponent, CommonModule],
 })
 export class AvailablePlacesComponent implements OnInit {
+
+  places = signal<Place[] | undefined>(undefined);
   isFetching = signal(false);
   errorMessage = signal('');
-  places = signal<Place[] | undefined>(undefined);
+  private destroyRef = inject(DestroyRef);
   private httpClient = inject(HttpClient);
+  private placesService = inject(PlacesService);
   // alternative
   // constructor(private httpClient:HttpClient){}
 
-  private destroyRef = inject(DestroyRef)
+
 
   ngOnInit(): void {
     this.isFetching.set(true);
-    const subscription = this.httpClient.get<{places:Place[]}>('http://localhost:3000/places'
-    ).pipe(map((resDataObj)=>resDataObj.places),catchError((error)=>{
-      console.error(error);
-      return throwError(()=>new Error('Something is wrog! Please try again!!!'))
-      
-    })).subscribe({
-      next: (resArray) => {
+    const subscription = this.placesService.loadAvailablePlaces().subscribe({
+      next: (resArray: Place[]) => {
         this.places.set(resArray)
-        console.log(resArray);
-        
       },
-      complete:()=>{
+      complete: () => {
         this.isFetching.set(false)
       },
-      error:(err:Error)=>{
+      error: (err: Error) => {
         console.error(err)
         return this.errorMessage.set(err.message)
       }
 
     });
     this.destroyRef.onDestroy(() => subscription.unsubscribe())
-
   };
 
-  onSelectPlace(selectedPlace:Place){
-    this.httpClient.put('http://localhost:3000/user-places',{
-      placeId:selectedPlace.id
-    }).subscribe({
-      next:(resData)=>console.log(resData)
-      
+  onSelectPlace(selectedPlace:Place) {
+   const subscription= this.placesService.addPlaceToUserPlaces(selectedPlace).subscribe({
+      next: (resData) => console.log(resData)
+
     })
+    this.destroyRef.onDestroy(() => subscription.unsubscribe())
   }
 }
