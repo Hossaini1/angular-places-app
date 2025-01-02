@@ -13,7 +13,7 @@ import { PlacesService } from '../places.service';
   imports: [PlacesContainerComponent, PlacesComponent],
 })
 export class UserPlacesComponent implements OnInit {
-  
+
   isLoading = signal(false);
   errorMsg = signal('');
   private placesService = inject(PlacesService);
@@ -24,9 +24,16 @@ export class UserPlacesComponent implements OnInit {
     this.isLoading.set(true);
     const subscription = this.placesService.loadUserPlaces().subscribe({
 
-        complete: () => this.isLoading.set(false),
-        
-      })
+      complete: () => this.isLoading.set(false),
+
+    })
     this.destroyRef.onDestroy(() => subscription.unsubscribe())
+  }
+
+  onRemovePlace(place: Place) {
+    const subscription = this.placesService.removeUserPlace(place).subscribe();
+    this.destroyRef.onDestroy(() => {
+      subscription.unsubscribe()
+    })
   }
 }

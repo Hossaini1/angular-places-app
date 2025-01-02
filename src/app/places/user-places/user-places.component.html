@@ -6,7 +6,7 @@
   <p class="fallback-text">{{errorMsg()}}</p>
   }
    @if(places()){
-  <app-places [places]="places()!" />
+  <app-places [places]="places()!" (selectPlace)="onRemovePlace($event)"/>
   }@else {
     <p class="fallback-text">Sorry! There is no places!</p>
   }
